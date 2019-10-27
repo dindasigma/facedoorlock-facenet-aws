@@ -17,9 +17,10 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 emdTrainX, trainy = list(), list()
 
-
+# Init DynamoDB
 session = boto3.Session(profile_name=config['profile_name'])
 dynamodb = session.resource('dynamodb')
+# select table from DynamoDB
 table = dynamodb.Table(config['table_users'])
 response = table.scan()
 peoples = len(response['Items'])
