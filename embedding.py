@@ -6,6 +6,7 @@ import numpy as np
 from inception_resnet_v1 import *
 from function import extract_face, get_embedding
 import boto3
+from boto3.dynamodb.conditions import Attr
 import uuid
 import tempfile
 
@@ -13,6 +14,23 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--email', type=str, default='dinda@isi.co.id', help='userid (email) and folder name')
     return parser.parse_args()
+
+def save_data(data):
+    try:
+        response = table.put_item(
+            Item={
+                'id': str(uuid.uuid4()),
+                'userid': data['userid'],
+                'embeddingFace': data['embedding_face'],
+                'countPhoto': data['count_photo']
+            },
+            ConditionExpression='attribute_not_exists(userid)'
+
+        )
+    except ClientError as e:
+        return (e.response['Error']['Message'])
+    else:
+        return ("successfully save embedding face with email: %s" % (email) )
 
 args = get_args()
 config = yaml.load(open('config.yaml'))
@@ -36,6 +54,8 @@ X, faces = list(), list()
 
 count = 0
 count_photo = 0
+data = {}
+
 # get photos in s3 bucket
 for my_bucket_object in my_bucket.objects.all():
     if email in my_bucket_object.key:
@@ -62,15 +82,8 @@ X.extend(faces)
 arr = np.array(X)
 encoded = arr.tostring()
 
+data['userid'] = email
+data['embedding_face'] = encoded
+data['count_photo'] = count_photo
 
-# insert data face to dynamodb
-insert_data = table.put_item(
-    Item={
-        'id': str(uuid.uuid4()),
-        'userid': email,
-        'embeddingFace': encoded,
-        'countPhoto': count_photo
-    }
-)
-
-print(insert_data)
+print(save_data(data))

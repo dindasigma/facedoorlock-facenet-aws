@@ -13,18 +13,33 @@ from function import get_embedding
 import boto3
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
+def get_people():
+	# Init DynamoDB
+	session = boto3.Session(profile_name=config['profile_name'])
+	dynamodb = session.resource('dynamodb')
+	# select table from DynamoDB
+	table = dynamodb.Table(config['table_users'])
+	response = table.scan()
+	count_people = len(response['Items'])
+
+	emdTrainX, trainy = list(), list()
+
+	for people in response['Items']:
+		print(people['userid'])
+		encoded = people['embeddingFace'].value
+		encode_array = np.frombuffer(encoded, dtype='float32')
+		i = int(people['countPhoto'])
+		embds_arr = encode_array.reshape(i, 128)
+		for face in embds_arr:
+			emdTrainX.append(face)
+		
+		for x in range(i):
+			trainy.append(people['userid'])
+
+	return emdTrainX, trainy, count_people
+	
 
 config = yaml.load(open('config.yaml'))
-
-emdTrainX, trainy = list(), list()
-
-# Init DynamoDB
-session = boto3.Session(profile_name=config['profile_name'])
-dynamodb = session.resource('dynamodb')
-# select table from DynamoDB
-table = dynamodb.Table(config['table_users'])
-response = table.scan()
-peoples = len(response['Items'])
 
 # Init AWSIoTMQTTClient
 myAWSIoTMQTTClient = AWSIoTMQTTClient(config['client_id'])
@@ -34,18 +49,7 @@ myAWSIoTMQTTClient.configureCredentials(config['root_ca_path'], config['private_
 # Connect and subscribe to AWS IoT
 myAWSIoTMQTTClient.connect()
 
-
-for people in response['Items']:
-	print(people['userid'])
-	encoded = people['embeddingFace'].value
-	encode_array = np.frombuffer(encoded, dtype='float32')
-	i = int(people['countPhoto'])
-	embds_arr = encode_array.reshape(i, 128)
-	for face in embds_arr:
-		emdTrainX.append(face)
-	
-	for x in range(i):
-		trainy.append(people['userid'])
+emdTrainX, trainy, count_people = get_people()
 
 emdTrainX = np.asarray(emdTrainX)	
 trainy = np.asarray(trainy)	
@@ -104,7 +108,7 @@ while(True):
 
 				label_name = 'unknown'
 				labels = []
-				for i in range(peoples):
+				for i in range(count_people):
 					labels.append(i)
 
 				all_names = out_encoder.inverse_transform(labels)
