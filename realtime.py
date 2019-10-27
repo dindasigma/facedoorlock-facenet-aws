@@ -3,6 +3,9 @@ import cv2
 import sys
 import yaml
 import json
+from PIL import Image
+from mtcnn.mtcnn import MTCNN
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import Normalizer
 from sklearn.svm import SVC
@@ -12,8 +15,6 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
 
 config = yaml.load(open('config.yaml'))
-
-face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 emdTrainX, trainy = list(), list()
 
@@ -56,10 +57,6 @@ emdTrainX_norm = in_encoder.transform(emdTrainX)
 
 out_encoder = LabelEncoder()
 out_encoder.fit(trainy)
-
-print("trainy:")
-print(trainy.shape)
-print("encoder:")
 trainy_enc = out_encoder.transform(trainy)
 
 # fit model
@@ -78,16 +75,20 @@ cap = cv2.VideoCapture(0) #webcam
 
 while(True):
 	ret, img = cap.read()
-	faces = face_cascade.detectMultiScale(img, 1.3, 5)
-	
-	for (x,y,w,h) in faces:
+	detector = MTCNN()
+	# detect faces in the image
+	results = detector.detect_faces(img)
+	print('results')
+	#print(results)
+	for i in range(len(results)):
+		x, y, w, h = results[i]['box']
+		
 		if w > 130: #discard small detected faces
 			cv2.rectangle(img, (x,y), (x+w,y+h), (67, 67, 67), 1) #draw rectangle to main image
 			
 			detected_face = img[int(y):int(y+h), int(x):int(x+w)] #crop detected face
 			detected_face = cv2.resize(detected_face, (160, 160)) #resize to 224x224
-			print('detected_face')
-			print(detected_face)
+
 			if detected_face is not None:
 				
 				random_face_emd = get_embedding(facenet_model, detected_face)
