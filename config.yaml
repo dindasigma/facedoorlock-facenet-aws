@@ -1,0 +1,8 @@
+bucket_name: 'apidoorlocksystem-dev'
+profile_name: 'group-infinys'
+table_users: 'Users-3rb3eizz55aklelrckuz5zg3dy-dev'
+
+photo_skip: 1
+threshold: 0.5
+
+model_dir: './facenet_weights.h5'
