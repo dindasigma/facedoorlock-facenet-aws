@@ -2,11 +2,14 @@ import numpy as np
 import cv2
 import sys
 import yaml
+import json
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import Normalizer
 from sklearn.svm import SVC
-from function import extract_face, get_embedding
+from function import get_embedding
 import boto3
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+
 
 config = yaml.load(open('config.yaml'))
 
@@ -21,17 +24,26 @@ table = dynamodb.Table(config['table_users'])
 response = table.scan()
 peoples = len(response['Items'])
 
+# Init AWSIoTMQTTClient
+myAWSIoTMQTTClient = AWSIoTMQTTClient(config['client_id'])
+myAWSIoTMQTTClient.configureEndpoint(config['endpoint'], config['port'])
+myAWSIoTMQTTClient.configureCredentials(config['root_ca_path'], config['private_key_path'], config['cert_path'])
+
+# Connect and subscribe to AWS IoT
+myAWSIoTMQTTClient.connect()
+
+
 for people in response['Items']:
-    print(people['userid'])
-    encoded = people['embeddingFace'].value
-    encode_array = np.frombuffer(encoded, dtype='float32')
-    i = int(people['countPhoto'])
-    embds_arr = encode_array.reshape(i, 128)
-    for face in embds_arr:
-    	emdTrainX.append(face)
-    
-    for x in range(i):
-    	trainy.append(people['userid'])
+	print(people['userid'])
+	encoded = people['embeddingFace'].value
+	encode_array = np.frombuffer(encoded, dtype='float32')
+	i = int(people['countPhoto'])
+	embds_arr = encode_array.reshape(i, 128)
+	for face in embds_arr:
+		emdTrainX.append(face)
+	
+	for x in range(i):
+		trainy.append(people['userid'])
 
 emdTrainX = np.asarray(emdTrainX)	
 trainy = np.asarray(trainy)	
@@ -108,6 +120,14 @@ while(True):
 					#connect face and text
 					cv2.line(img,(x+w, y-64),(x+w-25, y-64),(67,67,67),1)
 					cv2.line(img,(int(x+w/2),y),(x+w-25,y-64),(67,67,67),1)
+
+					# open the door
+					message = {}
+					message['pin'] = config['door_pin']
+					message['command'] = 'open'
+					message['requester'] = label_name
+					messageJson = json.dumps(message)
+					myAWSIoTMQTTClient.publish(config['topic'], messageJson, 1)
 			
 	cv2.imshow('img',img)
 	

@@ -6,3 +6,13 @@ photo_skip: 1
 threshold: 0.5
 
 model_dir: './facenet_weights.h5'
+
+door_pin: 1
+topic: 'iot/doors'
+
+endpoint: 'a2t7fxo73ekgjm-ats.iot.ap-southeast-1.amazonaws.com'
+root_ca_path: './things/certs/AmazonRootCA1.pem'
+cert_path: './things/certs/iot-door-cert.pem.crt'
+private_key_path: './things/certs/iot-door-private.pem.key'
+port: 8883
+client_id: 'Relay'

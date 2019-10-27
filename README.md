@@ -1,6 +1,6 @@
 # FaceDoorLock System with FaceNet and Amazon Web Services (AWS)
 
-FaceDoorLock System implemented with AWS IoT Things, Amazon S3, and DynamoDB. Face detection was performed by using [Multi-task Cascaded Convolutional Networks (MTCNN)](https://arxiv.org/pdf/1604.02878.pdf) and face recognition by using [FaceNet](https://arxiv.org/abs/1503.03832).
+FaceDoorLock System implemented with AWS IoT Things, Amazon S3, and DynamoDB. Face detection was performed by using [Multi-task Cascaded Convolutional Networks (MTCNN)](https://arxiv.org/pdf/1604.02878.pdf) and face recognition by using [FaceNet](https://arxiv.org/abs/1503.03832) and Support Vector Machine (SVM).
 
 ## TODO List
 
@@ -8,8 +8,8 @@ FaceDoorLock System implemented with AWS IoT Things, Amazon S3, and DynamoDB. Fa
 2. Get Embedding face (using MTCNN and FaceNet) and save to DynamoDB [done!]
 3. **Detect face in realtime using MTCNN [todo]**
 3. Recognize face in realtime according to embedding face in DynamoDB  [done!]
-4. **Publish the name of detected face to the topic using AWS IoT Things and MQTT [todo]**
-6. **Create Log and save to DynamoDB [todo**]
+4. Publish the name of detected face to the topic using AWS IoT Things and MQTT [done!]
+6. **Create Log and save to DynamoDB (on subscriber) [todo**]
 
 
 
@@ -22,6 +22,7 @@ FaceDoorLock System implemented with AWS IoT Things, Amazon S3, and DynamoDB. Fa
 - mtcnn 0.0.9
 - numpy 1.17
 - scikit-learn 0.20 
+- AWSIoTPythonSDK 1.4
 
 
 
