@@ -1,0 +1,13 @@
+table_doors: 'Doors-3rb3eizz55aklelrckuz5zg3dy-dev'
+table_log: 'Log-3rb3eizz55aklelrckuz5zg3dy-dev'
+
+profile_name: 'default'
+
+topic: 'iot/doors'
+
+endpoint: ''
+root_ca_path: './certs/AmazonRootCA1.pem'
+cert_path: './certs/iot-door-cert.pem.crt'
+private_key_path: './certs/iot-door-private.pem.key'
+port: 8883
+client_id: 'Relay'

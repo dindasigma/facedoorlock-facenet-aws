@@ -9,7 +9,7 @@ FaceDoorLock System implemented with AWS IoT Things, Amazon S3, and DynamoDB. Fa
 3. Detect face in realtime using MTCNN [done!]
 3. Recognize face in realtime using FaceNet according to embedding face in DynamoDB  [done!]
 4. Publish the name of detected face to the topic using AWS IoT Things and MQTT [done!]
-6. **Create Log and save to DynamoDB (on subscriber) [todo**]
+6. Create Log and save to DynamoDB (on subscriber) [done!]
 
 
 
